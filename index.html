@@ -1,0 +1,441 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Docker Tech Talk</title>
+
+		<meta name="description" content="Docker Tech Talk">
+		<meta name="author" content="Sander Smits">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/solarized.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+		
+        <style type="text/css">
+            p { text-align: left; }
+        </style>
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h1>Docker</h1>
+					<h2>Tech Talk</h2>
+					<p style="text-align: center;">
+						<small><a href="https://www.nelen-schuurmans.nl">10 maart 2016</a></small>
+					</p>
+				</section>
+
+				<section>
+					<h2>Wat is docker?</h2>
+					<h3>En wat kunnen wij er mee?</h3>
+					<img src="img/what_is_docker.png">
+				</section>
+
+				<section>
+					<h2>Evolutie van applicatie isolatie</h2>
+					<img src="img/app_isolation_edit.png">
+				</section>
+
+                <section>
+                    <section>
+                        <h2>VM's vs containers</h2>
+                        <ul>
+                            <li>Allereerst: VM's en containers zijn complementair</li>
+                            <li>VM's kunnen het best gebruikt worden om stukken hardware toe te wijzen</li>
+                            <li>Containers werken op proces niveau, wat ze erg licht maken en heel geschikt als unit van software delivery</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>VM's vs containers</h2>
+                        <h3>1. Snapshots maken is sneller met Docker dan met VM's.</h3>
+                        <ul>
+                            <li>Omdat je meestal voortbouwt bovenop bestaande images zoals 'ubuntu:14.04', hoef je slechts zelden een snapshot te maken van het hele OS.</li> 
+                            <li>Je hoeft alleen een snapshot te maken van je veranderingen: dit gebeurt automatisch.</li>
+                            <li>Deze mogelijkheid om het OS in een gemeenschappelijk image te stoppen maakt het deployen op andere hosts eenvoudig en sneller.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>VM's vs containers</h2>
+                        <h3>2. Startup tijd is minder voor containers dan voor VM's.</h3>
+                        <ul>
+                            <li>VM heeft minuten nodig om op te starten.</li>
+                            <li>Containers starten in seconden, soms minder dan een seconde.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>VM's vs containers</h2>
+                        <h3>3. Docker images zijn beter overdraagbaar.</h3>
+                        <p>Docker images bestaan uit lagen. Wanneer we een image pullen of pushen, worden alleen de lagen die nog niet in de cache staan overgedragen. Dat betekent dat als we meerdere images hebben die gebaseerd zijn op dezelfde basis OS, dat we dan de basis laag maar 1 keer hoeven te maken of te downloaden. VM's hebben deze flexibiliteit niet.</p>
+                    </section>
+                    <section>
+                        <h2>VM's vs containers</h2>
+                        <h3>4. Versioning is mogelijk met Docker images.</h3>
+                        <pre><code data-trim>
+$ docker commit -m "Added more restrictive pg_hba.conf." \ 
+-a "Sander Smits" 0b2616b0e5a8 nens/postgres:9.5</code></pre>
+                    </section>
+                    <section>
+                        <h2>VM's vs containers</h2>
+                        <h3>5. Docker images hebben geen state.</h3>
+                        <ul>
+                            <li>In Docker terminologie: een read-only laag wordt een image genoemd. Een image verandert nooit.</li>
+                            <li>Omdat Docker een Union File System gebruikt, denken de processen dat het hele file system is gemount als read-write.</li>
+                            <li>Maar, alle veranderingen komen in de bovenste writeable laag.</li>
+                            <li>Daaronder blijven de originele files in het read-only image onaangetast.</li>
+                            <li>Omdat images niet veranderen, hebben ze geen state en zijn ze immutable.</li>
+                        </ul>
+                    </section>
+                    <section>
+                        <h2>VM's vs containers</h2>
+                        <h3>6. VM's zijn hardware-centrisch en containers zijn applicatie-centrisch.</h3>
+                        <p>Stel we hebben een container image van 1 GB. Als we een VM zou willen gebruiken als alternatief, dan zouden we 1 GB x het aantal VM's dat we willen nodig hebben. Met Docker kunnen we grootste deel van die 1 GB delen. Dus als we 1000 containers met hetzelfde OS hebben heb je maar iets meer dan 1 GB nodig om ze allemaal te runnen.</p> 
+                    </section>
+
+                </section>
+
+				<section>
+					<h2>Docker</h2>
+					<ul>
+                        <li>
+                            "Een open platform voor ontwikkelaars en systeembeheerders om gedistribueerde applicaties te bouwen, verschepen en te draaien."
+                        </li>
+						<li class="fragment roll-in">Een manier om je applicaties en hun dependencies te isoleren van hun omgeving.</li>
+                        <li class="fragment roll-in">
+                            Lichtgewicht containers
+                        </li>
+                        <li class="fragment roll-in">
+                            Beschikbaar voor de meeste Linux distro's
+                        </li>
+                    </ul>
+				</section>
+                 
+                <section>
+					<h2>Linux?</h2>
+                    <h3>Maar, ik heb een Mac!</h3>
+                    <p class="fragment roll-in">
+                        Geen probleem.
+                    </p>
+					<p class="fragment roll-in">
+                        Gebruik docker-machine met VirtualBox.
+					</p>
+					<p class="fragment roll-in">
+					    <br/>
+						<small>ook voor Windows</small>
+					</p>
+				</section>
+
+				<section>
+				    <section>
+				    	<h2>Lichtgewicht containers</h2>
+						<h3>Wat is een container eigenlijk?</h3>
+						<img src="img/container-docker-blue-whale.jpg">
+					</section>
+					<section>
+						<h2>Anatomie van een container</h2>
+						<img width="640" height="480" src="img/docker-filesystems-multilayer.png">
+					</section>
+				</section>
+
+				<section>
+					    <h2>Containers zijn gelaagd</h2>
+					    <h3>voorbeeld van Dockerfile</h3>
+					    <pre><code data-trim>
+# inframan/dockerfiles/base/Dockerfile.ubuntu-14.04-base
+FROM ubuntu:trusty
+
+MAINTAINER Sander Smits &lt;sander.smits@nelen-schuurmans.nl&gt;
+
+# system dependencies
+RUN apt-get update &amp;&amp; apt-get install -y \
+    python-software-properties wget build-essential git \
+    libevent-dev libfreetype6-dev libgeos-dev \ 
+    libhdf5-serial-dev libpng12-dev mercurial python-dev \
+    python-lxml python-mapnik python-numpy python-pip \ 
+    python-pyproj python-pysqlite2 python-psycopg2 python-sympy \
+    python-scipy spatialite-bin gdal-bin libgdal1h libnetcdf-dev \
+    netcdf-bin python-gdal
+
+# pip packages
+RUN pip install matplotlib six</code></pre>
+						<pre><code data-trim>
+$ docker build -t nens/ubuntu-14.04-base \
+  -f Dockerfile.ubuntu-14.04-base .</code></pre>
+				</section>
+
+				<section>
+					<h2>Voorbeeld van overerving</h2>
+					<pre><code data-trim>
+# inframan/dockerfiles/threedi/Dockerfile.subgrid-flow-base
+
+FROM dockrepo.lizard.net/nens/ubuntu-12.04-base
+
+MAINTAINER Sander Smits &lt;sander.smits@nelen-schuurmans.nl&gt;
+
+# run buildout and install calculation cores
+...
+
+# put custom supervisord.conf in place
+ADD supervisord.conf /srv/parts/supervisor/supervisord.conf
+
+WORKDIR /srv</code></pre>
+					<pre><code data-trim>
+$ docker build -t threedi/subgrid-flow-base \
+  -f Dockerfile.subgrid-flow-base .</code></pre>
+				</section>
+
+				<section>
+					<h2>Image pushen naar onze Docker registry</h2>
+					<p>Een Docker registry is een repository voor Docker images.</p>
+					<pre><code data-trim>
+$ docker images | grep threedi/subgrid-flow-base
+
+threedi/subgrid-flow-base latest 9caa7caa5ef2 ... 2.116 GB</code></pre>
+
+<pre><code data-trim>$ docker tag 9caa7caa5ef2 dockrepo.lizard.net/threedi/subgrid-flow-base
+
+$ docker images | grep threedi/subgrid-flow-base
+
+threedi/subgrid-flow-base latest 9caa7caa5ef2 ...
+dockrepo.lizard.net/subgrid-flow-base latest 9caa7caa5ef2 ...</code></pre>
+
+<pre><code data-trim>
+$ docker push dockrepo.lizard.net/threedi/subgrid-flow-base
+					</code></pre>
+				</section>
+
+				<section>
+					<h2>Officiele Docker registry</h2>
+					<ul>
+						<li>https://hub.docker.com</li>
+						<li>&gt; 100.000 Docker images</li>
+					</ul>
+					<pre><code data-trim>
+$ docker run -it --rm python:3.5.1 python 
+Python 3.5.1 (default, Mar  9 2016, 03:30:07) 
+[GCC 4.9.2] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+>>>
+</code></pre>
+				</section>
+
+				<section>
+					<h2>Images versus containers</h2>
+					<img src="img/images_vs_containers.png">
+				</section>
+
+				<section>
+					<h2>Wat kan Docker voor ontwikkelaars betekenen?</h2>
+					<ul>
+                        <li class="fragment roll-in">
+                            Het is snel
+                        </li>
+                         <li class="fragment roll-in">
+                            Het is <em>HEEL</em> snel: container start in seconden of minder!
+                        </li>
+                        <li class="fragment roll-in">
+                            Nauwelijks overhead / minimaal gebruik van extra resources
+                        </li>
+                        <li class="fragment roll-in">
+                            Run tientallen zo niet honderden containers op je laptop
+                        </li>
+                        <li class="fragment roll-in">
+                            Draai eenvoudig je productie stack lokaal
+                        </li>
+                        <li class="fragment roll-in">
+                            Continuous delivery (CD) is eindelijk echt mogelijk, dankzij een deployable artefact dat zich overal hetzelfde gedraagt 
+                        </li>
+                    </ul>
+				</section>
+
+				<section>
+					<h2>Wat kan Docker voor (dev)ops betekenen?</h2>
+					<ul>
+                        <li class="fragment roll-in">
+                            Eenvoudigere server setups
+                        </li>
+                        <li class="fragment roll-in">
+                            Scriptable infrastructure
+                        </li>
+                        <li class="fragment roll-in">
+                            Snelle en reproduceerbare deployments
+                        </li>
+                        <li class="fragment roll-in">
+                            Rollback = wijs load balancer (LB) naar vorige container(s)
+                        </li>
+                        <li class="fragment roll-in">
+                            Schaalbaarheid: zet meer containers achter de LB (in seconden). Kan zonder menselijke interventie.
+                        </li>
+                        <li class="fragment roll-in">
+                            Continuous delivery / deployment.
+                        </li>
+                    </ul>
+				</section>
+
+				<section>
+					<section>
+						<h2>Use case</h2>
+						<h3>Lokaal tools / nieuwe versies uitproberen</h3>
+						<div class="fragment roll-in">
+							<pre><code>$ docker run -d -p 8080:8080 -p 50000:50000 jenkins</code></pre>
+						</div>
+						<div class="fragment roll-in">
+							<pre><code data-trim>
+$ docker run -d -p 15672:15672 -p 5672:5672 rabbitmq:3-management</code></pre>
+						</div>
+						<div class="fragment roll-in">
+							<pre><code data-trim>
+$ docker run -d -p 9292:9292 -p 9200:9200 pblittle/docker-logstash</code></pre>
+  						</div>
+  						<div class="fragment roll-in">
+							<pre><code data-trim>$ docker run -d mdillon/postgis:9.5</code></pre>
+  						</div>
+					</section>
+
+					<section>
+						<h2>Use case</h2>
+						<h3>Jenkins</h3>
+						<img width="480" height="360" src="img/docker-jenkins.png">
+					</section>
+
+					<section>
+						<h2>Use case</h2>
+						<h3>1. Jenkins - geisoleerde test omgevingen</h3>
+						<img width="480" height="360" src="img/docker_and_jenkins.jpg">
+					</section>
+
+					<section>
+						<h2>Use case</h2>
+						<h3>1. Jenkins - geisoleerde test omgevingen</h3>
+						<ul>
+							<li>Probleem: dependency hell</li>
+							<li>Verschillende repo's gebruiken verschillende versies van systeem pakketjes</li>
+							<li>Oplossing: draai tests voor iedere repo geisoleerd in een Docker met z'n eigen systeem dependencies.</li>
+							<li>Je kunt je code zelfs testen met andere versies van databases, postgres 9.3, 9.4, 9.5, postgis versies, etc.</li>
+						</ul>
+					</section>
+
+					<section>
+						<h2>Use case</h2>
+						<h3>2. Jenkins - continuous delivery / deployment</h3>
+						<ul>
+                            <li>Bouw, test en deploy images met Jenkins</li>
+							<li>Bouw je Docker images op zo'n manier dat ze ongewijzigd kunnen draaien op dev, staging, production, etc..</li>
+                            <li>Ofwel volgens de 'twelve-factor' methodologie, zie 12factor.net</li>
+						</ul>
+					</section>
+
+                    <section>
+                        <h2>Use case</h2>
+                        <h3>Infrastructuur optimalisatie</h3>
+                        <ul>
+                            <li>Maak efficienter gebruik van je beschikbare resources</li>
+                            <li>Containers kunnen worden gescheduled op servers die resources vrij hebben</li>
+                            <li>Hiermee kun je besparen op server kosten</li>
+                        </ul>
+                    </section>
+				</section>
+
+                <section>
+                    <h2>Toegift: hoe draai je een stack lokaal?</h2>
+                    <h3>Voorbeeld: onze inpy server met docker-compose</h3>
+                    <pre><code data-trim>
+# docker-compose.yml
+
+# rabbitmq for celery
+mq:
+    image: rabbitmq
+
+# postgis
+db:
+    image: kartoza/postgis:9.3
+    volumes:
+        - /data/postgres:/var/lib/postgresql
+
+# threedi-inpy
+inpy:
+    image: dockrepo.lizard.net/threedi/inpy:latest
+    ports:
+        - "9010:5000"
+    volumes:
+        - /data/models:/srv/var/models
+    environment:
+        - REDIS_HOST=10.0.3.100
+        - RABBIT_MQ_HOST=mq
+        - DATABASE_HOST=db
+        - DATABASE_NAME=gis
+        - DATABASE_USER=docker
+        - DATABASE_PASSWORD=docker
+    command: /srv/bin/supervisord
+    links:
+        - mq
+        - db</code></pre>
+                       <pre><code>$ docker-compose up</code></pre>
+                   </section>
+
+                   <section>
+                       <h2>Einde</h2>
+                       <!--img width="480" src="img/docker_pump_baby.jpg"-->
+                       <img width="480" src="img/docker_future.jpg">
+                       <h3>Vragen?</h3>
+                   </section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
